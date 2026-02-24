@@ -1,7 +1,6 @@
 import 'package:hive/hive.dart';
 import '../../domain/entities/reading_goal_entity.dart';
 
-part 'reading_goal_model.g.dart';
 
 @HiveType(typeId: 10)
 class ReadingGoalModel extends HiveObject {
