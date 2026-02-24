@@ -40,11 +40,11 @@ dependencies:
 
   # Prayer Times
   adhan: ^1.1.2
-  geolocator: ^12.0.0
+  geolocator: ^10.1.0
   geocoding: ^3.0.0
 
   # Qibla
-  flutter_qiblah: ^2.1.3
+  flutter_qiblah: ^2.2.1
   sensors_plus: ^5.0.1
 
   # Notifications
