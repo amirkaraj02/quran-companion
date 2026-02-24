@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace "com.qurancompanion.app"
-    compileSdk = 34
+    // Bump compileSdk to 35 to satisfy plugins requiring Android SDK 35+
+    compileSdk = 35
     ndkVersion = "25.1.8937393"
 
     compileOptions {
@@ -21,7 +22,8 @@ android {
     defaultConfig {
         applicationId "com.qurancompanion.app"
         minSdk = 24
-        targetSdk = 34
+        // Bump targetSdk to 35 to match compileSdk and plugin requirements
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
         multiDexEnabled true
