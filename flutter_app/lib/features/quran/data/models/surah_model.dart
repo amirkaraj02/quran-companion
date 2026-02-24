@@ -1,7 +1,6 @@
 import 'package:hive/hive.dart';
 import '../../domain/entities/surah_entity.dart';
 
-part 'surah_model.g.dart';
 
 @HiveType(typeId: 1)
 class SurahModel extends HiveObject {

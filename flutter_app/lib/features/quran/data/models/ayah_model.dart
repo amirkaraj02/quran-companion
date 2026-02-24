@@ -1,7 +1,6 @@
 import 'package:hive/hive.dart';
 import '../../domain/entities/ayah_entity.dart';
 
-part 'ayah_model.g.dart';
 
 @HiveType(typeId: 2)
 class AyahModel extends HiveObject {

@@ -1,7 +1,6 @@
 import 'package:hive/hive.dart';
 import '../../domain/entities/bookmark_entity.dart';
 
-part 'bookmark_model.g.dart';
 
 @HiveType(typeId: 3)
 class BookmarkModel extends HiveObject {
