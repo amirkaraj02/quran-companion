@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quran Companion — Admin Panel</title>
+<style>
+  :root {
+    --primary: #1B6B3A;
+    --primary-light: #e8f5ee;
+    --gold: #C9A84C;
+    --dark: #1a1a2e;
+    --grey: #6c757d;
+    --bg: #f8f9fa;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--dark); display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar { width: 240px; background: var(--dark); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+  .sidebar-logo { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+  .sidebar-logo .icon { font-size: 28px; }
+  .sidebar-logo h2 { font-size: 14px; font-weight: 600; color: var(--gold); }
+  .sidebar-logo span { font-size: 11px; color: rgba(255,255,255,0.5); }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.65); cursor: pointer; font-size: 14px; transition: 0.2s; border-left: 3px solid transparent; }
+  .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.07); color: white; border-left-color: var(--gold); }
+  .nav-item .nav-icon { width: 20px; text-align: center; }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  /* Main */
+  .main { margin-left: 240px; flex: 1; padding: 28px; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  .topbar h1 { font-size: 22px; font-weight: 700; }
+  .topbar .subtitle { font-size: 13px; color: var(--grey); margin-top: 2px; }
+  .btn { padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: #165830; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+  .btn-outline:hover { background: var(--primary-light); }
+  .btn-danger { background: #dc3545; color: white; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* Stats grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: var(--white); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; }
+  .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .stat-icon.green { background: var(--primary-light); }
+  .stat-icon.gold { background: #fef9e7; }
+  .stat-icon.blue { background: #e8f0fe; }
+  .stat-icon.purple { background: #f3e8fd; }
+  .stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--grey); margin-top: 2px; }
+
+  /* Cards */
+  .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+  .card-header h3 { font-size: 15px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  /* Table */
+  .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .table th { text-align: left; padding: 10px 12px; color: var(--grey); font-weight: 500; border-bottom: 2px solid #f0f0f0; white-space: nowrap; }
+  .table td { padding: 11px 12px; border-bottom: 1px solid #f9f9f9; vertical-align: middle; }
+  .table tr:hover td { background: #fafafa; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .badge-success { background: #e8f5ee; color: var(--primary); }
+  .badge-warning { background: #fef9e7; color: #b8860b; }
+  .badge-info { background: #e8f0fe; color: #1a73e8; }
+
+  /* Upload area */
+  .upload-zone { border: 2px dashed #d0d0d0; border-radius: var(--radius); padding: 40px; text-align: center; cursor: pointer; transition: 0.2s; }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--primary); background: var(--primary-light); }
+  .upload-zone .upload-icon { font-size: 40px; margin-bottom: 10px; }
+  .upload-zone h4 { font-size: 14px; margin-bottom: 4px; }
+  .upload-zone p { font-size: 12px; color: var(--grey); }
+  .progress-bar { height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 12px; display: none; }
+  .progress-bar .fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.3s; width: 0%; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #f0f0f0; padding: 4px; border-radius: 8px; width: fit-content; }
+  .tab-btn { padding: 7px 16px; border: none; background: transparent; border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.2s; color: var(--grey); }
+  .tab-btn.active { background: white; color: var(--dark); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+  /* Form */
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+  .form-control { width: 100%; padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 7px; font-size: 14px; outline: none; transition: 0.2s; }
+  .form-control:focus { border-color: var(--primary); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Page visibility */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Alert */
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .alert-success { background: var(--primary-light); color: var(--primary); border-left: 3px solid var(--primary); }
+  .alert-info { background: #e8f0fe; color: #1a73e8; border-left: 3px solid #1a73e8; }
+
+  /* Arabic preview */
+  .arabic-preview { font-family: "Scheherazade New", "Traditional Arabic", serif; direction: rtl; font-size: 20px; line-height: 2; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <span class="icon">🕌</span>
+    <div>
+      <h2>Quran Companion</h2>
+      <span>Admin Panel v1.0</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('users')">
+      <span class="nav-icon">👥</span> Users
+    </div>
+    <div class="nav-item" onclick="showPage('quran-upload')">
+      <span class="nav-icon">📖</span> Quran Content
+    </div>
+    <div class="nav-item" onclick="showPage('translations')">
+      <span class="nav-icon">🌍</span> Translations
+    </div>
+    <div class="nav-item" onclick="showPage('audio')">
+      <span class="nav-icon">🎵</span> Audio Recitations
+    </div>
+    <div class="nav-item" onclick="showPage('analytics')">
+      <span class="nav-icon">📈</span> Analytics
+    </div>
+    <div class="nav-item" onclick="showPage('settings')">
+      <span class="nav-icon">⚙️</span> Settings
+    </div>
+  </nav>
+  <div class="sidebar-footer">Quran Companion API v1.0<br>ASP.NET Core + PostgreSQL</div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- ─── DASHBOARD ─── -->
+  <div id="page-dashboard" class="page active">
+    <div class="topbar">
+      <div>
+        <h1>Dashboard</h1>
+        <div class="subtitle">Overview of the Quran Companion platform</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" onclick="refreshStats()">🔄 Refresh</button>
+        <button class="btn btn-primary">📊 Export Report</button>
+      </div>
+    </div>
+
+    <div class="alert alert-success">
+      <span>✅</span> API is running. Last checked: <span id="lastCheck"></span>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon green">👤</div>
+        <div><div class="stat-value" id="totalUsers">—</div><div class="stat-label">Total Users</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon gold">📖</div>
+        <div><div class="stat-value" id="activeGoals">—</div><div class="stat-label">Active Goals</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">📄</div>
+        <div><div class="stat-value">604</div><div class="stat-label">Quran Pages</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🎵</div>
+        <div><div class="stat-value" id="audioFiles">—</div><div class="stat-label">Audio Files</div></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card">
+        <div class="card-header">
+          <h3>📖 Quran Content Status</h3>
+          <span class="badge badge-success">Ready</span>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <thead><tr><th>Item</th><th>Status</th><th>Count</th></tr></thead>
+            <tbody>
+              <tr><td>Arabic Text (Uthmani)</td><td><span class="badge badge-success">Loaded</span></td><td>6,236 ayahs</td></tr>
+              <tr><td>Page Mappings</td><td><span class="badge badge-success">Loaded</span></td><td>604 pages</td></tr>
+              <tr><td>Surah Metadata</td><td><span class="badge badge-success">Loaded</span></td><td>114 surahs</td></tr>
+              <tr><td>Albanian Translation</td><td><span class="badge badge-warning">Pending</span></td><td>0 ayahs</td></tr>
+              <tr><td>English Translation</td><td><span class="badge badge-info">Available</span></td><td>6,236 ayahs</td></tr>
+              <tr><td>Turkish Translation</td><td><span class="badge badge-warning">Pending</span></td><td>0 ayahs</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>⚡ Quick Actions</h3></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-primary" onclick="showPage('quran-upload')">📤 Upload Quran Data</button>
+          <button class="btn btn-outline" onclick="showPage('translations')">🌍 Manage Translations</button>
+          <button class="btn btn-outline" onclick="showPage('audio')">🎵 Upload Audio</button>
+          <button class="btn btn-outline" onclick="showPage('users')">👥 View All Users</button>
+          <button class="btn btn-outline" style="color:#dc3545;border-color:#dc3545" onclick="clearCache()">🗑️ Clear Cache</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── USERS ─── -->
+  <div id="page-users" class="page">
+    <div class="topbar">
+      <div><h1>Users</h1><div class="subtitle">Manage registered users</div></div>
+      <input type="text" class="form-control" style="width:220px" placeholder="🔍 Search users..." oninput="filterUsers(this.value)">
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>All Users</h3>
+        <span class="badge badge-info" id="userCount">Loading...</span>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table class="table" id="usersTable">
+          <thead>
+            <tr>
+              <th>Name</th><th>Email</th><th>Joined</th>
+              <th>Goals</th><th>Pages Read</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody">
+            <tr><td colspan="7" style="text-align:center;padding:30px;color:#999">Loading users from API...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── QURAN UPLOAD ─── -->
+  <div id="page-quran-upload" class="page">
+    <div class="topbar">
+      <div><h1>Quran Content</h1><div class="subtitle">Upload and manage Quran text data</div></div>
+    </div>
+
+    <div class="alert alert-info">
+      <span>ℹ️</span> Upload JSON files for Quran text. Format: array of {surah, ayah, text, page} objects.
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card">
+        <div class="card-header"><h3>📖 Arabic Text (Uthmani Script)</h3></div>
+        <div class="card-body">
+          <div class="upload-zone" id="arabicZone" ondragover="dragOver(event, 'arabicZone')" ondrop="drop(event, 'arabicZone', 'arabic')" onclick="triggerUpload('arabicFile')">
+            <div class="upload-icon">🕌</div>
+            <h4>Drop quran-uthmani.json here</h4>
+            <p>or click to browse<br>Expected: 6,236 entries</p>
+            <div class="progress-bar" id="arabicProgress"><div class="fill"></div></div>
+          </div>
+          <input type="file" id="arabicFile" accept=".json" style="display:none" onchange="uploadFile(this, 'arabic')">
+          <div id="arabicStatus" style="margin-top:12px;font-size:12px;color:#666"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>📑 Page Mapping Data</h3></div>
+        <div class="card-body">
+          <div class="upload-zone" onclick="triggerUpload('pageFile')">
+            <div class="upload-icon">📄</div>
+            <h4>Drop page-mapping.json here</h4>
+            <p>Maps ayahs to page numbers<br>Expected: 604 page entries</p>
+          </div>
+          <input type="file" id="pageFile" accept=".json" style="display:none">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>📋 Surah Metadata</h3></div>
+        <div class="card-body">
+          <div class="upload-zone" onclick="triggerUpload('surahFile')">
+            <div class="upload-icon">📋</div>
+            <h4>Drop surahs.json here</h4>
+            <p>Names, revelation type, etc.<br>Expected: 114 surahs</p>
+          </div>
+          <input type="file" id="surahFile" accept=".json" style="display:none">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>✅ Upload History</h3></div>
+        <div class="card-body">
+          <table class="table">
+            <thead><tr><th>File</th><th>Uploaded</th><th>Status</th></tr></thead>
+            <tbody id="uploadHistory">
+              <tr><td colspan="3" style="text-align:center;color:#999">No uploads yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TRANSLATIONS ─── -->
+  <div id="page-translations" class="page">
+    <div class="topbar">
+      <div><h1>Translations</h1><div class="subtitle">Manage Quran translations in multiple languages</div></div>
+      <button class="btn btn-primary" onclick="document.getElementById('translationModal').style.display='flex'">+ Add Translation</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="filterTranslations('all', this)">All</button>
+      <button class="tab-btn" onclick="filterTranslations('sq', this)">Albanian</button>
+      <button class="tab-btn" onclick="filterTranslations('en', this)">English</button>
+      <button class="tab-btn" onclick="filterTranslations('tr', this)">Turkish</button>
+    </div>
+
+    <div class="card">
+      <div class="card-body" style="padding:0">
+        <table class="table">
+          <thead>
+            <tr><th>Translation Name</th><th>Language</th><th>Translator</th><th>Ayahs</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Sahih International</td>
+              <td><span class="badge badge-info">EN</span></td>
+              <td>Sahih International</td><td>6,236</td>
+              <td><span class="badge badge-success">Active</span></td>
+              <td><button class="btn btn-sm btn-outline">Edit</button></td>
+            </tr>
+            <tr>
+              <td>Diyanet İşleri</td>
+              <td><span class="badge badge-warning">TR</span></td>
+              <td>Diyanet İşleri Başkanlığı</td><td>6,236</td>
+              <td><span class="badge badge-success">Active</span></td>
+              <td><button class="btn btn-sm btn-outline">Edit</button></td>
+            </tr>
+            <tr>
+              <td>Hasan Nahi (Albanian)</td>
+              <td><span class="badge badge-success">SQ</span></td>
+              <td>Hasan Nahi</td><td>0</td>
+              <td><span class="badge badge-warning">Pending Upload</span></td>
+              <td><button class="btn btn-sm btn-primary">Upload</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── AUDIO ─── -->
+  <div id="page-audio" class="page">
+    <div class="topbar">
+      <div><h1>Audio Recitations</h1><div class="subtitle">Manage downloadable audio files per surah</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>📤 Upload Audio Files</h3></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Reciter Name</label>
+            <input type="text" class="form-control" placeholder="e.g. Abdul Rahman Al-Sudais">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Surah Number</label>
+            <select class="form-control" id="surahSelect">
+              <option value="">Select Surah...</option>
+            </select>
+          </div>
+        </div>
+        <div class="upload-zone" onclick="triggerUpload('audioFile')">
+          <div class="upload-icon">🎵</div>
+          <h4>Drop MP3 file here</h4>
+          <p>Supported format: MP3, average 5–15 MB per surah</p>
+        </div>
+        <input type="file" id="audioFile" accept=".mp3,.m4a" style="display:none">
+        <div style="margin-top:16px;display:flex;gap:10px">
+          <button class="btn btn-primary">📤 Upload Audio</button>
+          <button class="btn btn-outline">📋 Bulk Upload Guide</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>🎵 Available Recitations</h3></div>
+      <div class="card-body" style="padding:0">
+        <table class="table">
+          <thead><tr><th>Reciter</th><th>Surah</th><th>Size</th><th>Downloads</th><th>Actions</th></tr></thead>
+          <tbody id="audioList">
+            <tr><td colspan="5" style="text-align:center;padding:30px;color:#999">No audio files uploaded yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ANALYTICS ─── -->
+  <div id="page-analytics" class="page">
+    <div class="topbar"><div><h1>Analytics</h1><div class="subtitle">Platform usage statistics</div></div></div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon green">📅</div>
+        <div><div class="stat-value">—</div><div class="stat-label">Daily Active Users</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon gold">📖</div>
+        <div><div class="stat-value">—</div><div class="stat-label">Pages Read Today</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">🏆</div>
+        <div><div class="stat-value">—</div><div class="stat-label">Hatims Completed</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">🔥</div>
+        <div><div class="stat-value">—</div><div class="stat-label">Avg. Reading Streak</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>📊 Reading Activity (Last 30 Days)</h3></div>
+      <div class="card-body" style="height:200px;display:flex;align-items:center;justify-content:center;color:#999">
+        Connect to API to load chart data
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SETTINGS ─── -->
+  <div id="page-settings" class="page">
+    <div class="topbar"><div><h1>Settings</h1><div class="subtitle">API and platform configuration</div></div></div>
+    <div style="max-width:600px">
+      <div class="card">
+        <div class="card-header"><h3>🔗 API Configuration</h3></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">API Base URL</label>
+            <input type="url" class="form-control" id="apiBaseUrl" value="https://localhost:7000/api" oninput="saveSettings()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Admin JWT Token</label>
+            <input type="password" class="form-control" id="adminToken" placeholder="Paste admin token here..." oninput="saveSettings()">
+          </div>
+          <button class="btn btn-primary" onclick="testConnection()">🔌 Test Connection</button>
+          <span id="connectionStatus" style="margin-left:12px;font-size:13px"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>🌐 Default Language</h3></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Default App Language</label>
+            <select class="form-control">
+              <option value="sq" selected>Albanian (Shqip) — Default</option>
+              <option value="en">English</option>
+              <option value="tr">Turkish (Türkçe)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────
+let apiBase = localStorage.getItem('apiBase') || 'https://localhost:7000/api';
+let adminToken = localStorage.getItem('adminToken') || '';
+
+function saveSettings() {
+  apiBase = document.getElementById('apiBaseUrl')?.value || apiBase;
+  adminToken = document.getElementById('adminToken')?.value || adminToken;
+  localStorage.setItem('apiBase', apiBase);
+  localStorage.setItem('adminToken', adminToken);
+}
+
+function loadSettings() {
+  const urlEl = document.getElementById('apiBaseUrl');
+  const tokenEl = document.getElementById('adminToken');
+  if (urlEl) urlEl.value = apiBase;
+  if (tokenEl) tokenEl.value = adminToken;
+}
+
+// ─── Navigation ──────────────────────────────────────────────
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId)?.classList.add('active');
+  event?.currentTarget?.classList.add('active');
+  if (pageId === 'dashboard') loadDashboard();
+  if (pageId === 'users') loadUsers();
+  if (pageId === 'settings') loadSettings();
+}
+
+// ─── Dashboard ───────────────────────────────────────────────
+async function loadDashboard() {
+  document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString();
+  // In production, fetch from API
+  document.getElementById('totalUsers').textContent = '—';
+  document.getElementById('activeGoals').textContent = '—';
+  document.getElementById('audioFiles').textContent = '0';
+}
+
+function refreshStats() { loadDashboard(); }
+function clearCache() { alert('Cache cleared successfully!'); }
+
+// ─── Users ───────────────────────────────────────────────────
+async function loadUsers() {
+  if (!adminToken) {
+    document.getElementById('usersBody').innerHTML =
+      '<tr><td colspan="7" style="text-align:center;padding:30px;color:#dc3545">⚠️ Set admin token in Settings to load users</td></tr>';
+    return;
+  }
+  try {
+    const res = await fetch(apiBase + '/admin/users', {
+      headers: { 'Authorization': 'Bearer ' + adminToken }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const users = await res.json();
+    document.getElementById('userCount').textContent = users.length + ' users';
+    document.getElementById('usersBody').innerHTML = users.map(u => `
+      <tr>
+        <td><strong>${u.name}</strong></td>
+        <td>${u.email}</td>
+        <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+        <td>—</td><td>—</td>
+        <td><span class="badge badge-success">Active</span></td>
+        <td><button class="btn btn-sm btn-outline">View</button></td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    document.getElementById('usersBody').innerHTML =
+      `<tr><td colspan="7" style="text-align:center;padding:30px;color:#999">Could not load users: ${e.message}</td></tr>`;
+  }
+}
+
+function filterUsers(query) {
+  const rows = document.querySelectorAll('#usersBody tr');
+  rows.forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(query.toLowerCase()) ? '' : 'none';
+  });
+}
+
+// ─── Translations ────────────────────────────────────────────
+function filterTranslations(lang, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ─── Upload ──────────────────────────────────────────────────
+function triggerUpload(inputId) {
+  document.getElementById(inputId).click();
+}
+
+function dragOver(e, zoneId) {
+  e.preventDefault();
+  document.getElementById(zoneId)?.classList.add('drag-over');
+}
+
+function drop(e, zoneId, type) {
+  e.preventDefault();
+  document.getElementById(zoneId)?.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processUpload(file, type);
+}
+
+function uploadFile(input, type) {
+  if (input.files[0]) processUpload(input.files[0], type);
+}
+
+function processUpload(file, type) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const count = Array.isArray(data) ? data.length : Object.keys(data).length;
+      const statusEl = document.getElementById(type + 'Status');
+      if (statusEl) {
+        statusEl.innerHTML = `✅ <strong>${file.name}</strong> loaded — ${count.toLocaleString()} entries`;
+        statusEl.style.color = 'var(--primary)';
+      }
+      // Add to upload history
+      const tbody = document.getElementById('uploadHistory');
+      if (tbody) {
+        const row = tbody.querySelector('td[colspan]');
+        if (row) tbody.innerHTML = '';
+        tbody.innerHTML += `<tr><td>${file.name}</td><td>${new Date().toLocaleString()}</td><td><span class="badge badge-success">✓ ${count.toLocaleString()} entries</span></td></tr>`;
+      }
+    } catch {
+      alert('Invalid JSON file. Please check the format.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ─── Connection Test ─────────────────────────────────────────
+async function testConnection() {
+  const el = document.getElementById('connectionStatus');
+  el.textContent = '⏳ Testing...';
+  el.style.color = '#888';
+  try {
+    const res = await fetch(apiBase.replace('/api', '') + '/health');
+    if (res.ok) {
+      el.textContent = '✅ Connected!';
+      el.style.color = 'var(--primary)';
+    } else {
+      el.textContent = '⚠️ HTTP ' + res.status;
+      el.style.color = 'orange';
+    }
+  } catch {
+    el.textContent = '❌ Cannot connect to API';
+    el.style.color = '#dc3545';
+  }
+}
+
+// ─── Surah dropdown ──────────────────────────────────────────
+const SURAHS = [
+  "Al-Fatihah","Al-Baqarah","Ali 'Imran","An-Nisa","Al-Ma'idah","Al-An'am","Al-A'raf","Al-Anfal",
+  "At-Tawbah","Yunus","Hud","Yusuf","Ar-Ra'd","Ibrahim","Al-Hijr","An-Nahl","Al-Isra","Al-Kahf",
+  "Maryam","Ta-Ha","Al-Anbiya","Al-Hajj","Al-Mu'minun","An-Nur","Al-Furqan","Ash-Shu'ara",
+  "An-Naml","Al-Qasas","Al-'Ankabut","Ar-Rum","Luqman","As-Sajdah","Al-Ahzab","Saba","Fatir",
+  "Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir","Fussilat","Ash-Shura","Az-Zukhruf","Ad-Dukhan",
+  "Al-Jathiyah","Al-Ahqaf","Muhammad","Al-Fath","Al-Hujurat","Qaf","Adh-Dhariyat","At-Tur",
+  "An-Najm","Al-Qamar","Ar-Rahman","Al-Waqi'ah","Al-Hadid","Al-Mujadila","Al-Hashr","Al-Mumtahanah",
+  "As-Saf","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Mulk","Al-Qalam",
+  "Al-Haqqah","Al-Ma'arij","Nuh","Al-Jinn","Al-Muzzammil","Al-Muddaththir","Al-Qiyamah","Al-Insan",
+  "Al-Mursalat","An-Naba","An-Nazi'at","'Abasa","At-Takwir","Al-Infitar","Al-Mutaffifin","Al-Inshiqaq",
+  "Al-Buruj","At-Tariq","Al-A'la","Al-Ghashiyah","Al-Fajr","Al-Balad","Ash-Shams","Al-Layl",
+  "Ad-Duha","Ash-Sharh","At-Tin","Al-'Alaq","Al-Qadr","Al-Bayyinah","Az-Zalzalah","Al-'Adiyat",
+  "Al-Qari'ah","At-Takathur","Al-'Asr","Al-Humazah","Al-Fil","Quraysh","Al-Ma'un","Al-Kawthar",
+  "Al-Kafirun","An-Nasr","Al-Masad","Al-Ikhlas","Al-Falaq","An-Nas"
+];
+
+window.onload = function() {
+  const sel = document.getElementById('surahSelect');
+  if (sel) SURAHS.forEach((s, i) => sel.innerHTML += `<option value="${i+1}">${i+1}. ${s}</option>`);
+  loadDashboard();
+};
+</script>
+</body>
+</html>

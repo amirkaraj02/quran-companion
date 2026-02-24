@@ -1,0 +1,38 @@
+# Flutter
+flutter_app/.dart_tool/
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins-dependencies
+flutter_app/.packages
+flutter_app/build/
+flutter_app/.pub-cache/
+flutter_app/.pub/
+flutter_app/pubspec.lock
+
+# Android signing keys (NEVER commit these)
+*.jks
+*.keystore
+key.properties
+
+# .NET Backend
+backend/bin/
+backend/obj/
+backend/**/.vs/
+backend/**/*.user
+backend/**/bin/
+backend/**/obj/
+
+# Environment files
+.env
+.env.local
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Generated
+flutter_app/lib/generated/

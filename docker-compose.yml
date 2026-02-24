@@ -1,0 +1,50 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: quranapp_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: quranapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: QuranApp2024!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quranapp_api
+    restart: unless-stopped
+    ports:
+      - "7000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=quranapp;Username=postgres;Password=QuranApp2024!
+      - Jwt__Key=QuranAppProdSecretKey_MinLength32CharsHere!!
+      - Jwt__Issuer=QuranCompanionAPI
+      - Jwt__Audience=QuranCompanionApp
+      - Jwt__ExpiryHours=24
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  admin:
+    image: nginx:alpine
+    container_name: quranapp_admin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./admin_panel:/usr/share/nginx/html:ro
+
+volumes:
+  postgres_data:
