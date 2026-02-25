@@ -40,7 +40,7 @@ dependencies:
 
   # Prayer Times
   adhan: ^2.0.0+1
-  geolocator: ^14.0.0
+  geolocator: ^14.1.0
   geocoding: ^3.0.0
 
   # Qibla
@@ -89,6 +89,7 @@ dev_dependencies:
 
 dependency_overrides:
   vector_math: 2.1.4
+  geolocator_android: ^7.7.0
 
 flutter:
   generate: true 
