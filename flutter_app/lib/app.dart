@@ -5,7 +5,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/providers/locale_provider.dart';
-import 'generated/app_localizations.dart';
+import 'generated/l10n/app_localizations.dart';
 
 class QuranCompanionApp extends ConsumerWidget {
   const QuranCompanionApp({super.key});

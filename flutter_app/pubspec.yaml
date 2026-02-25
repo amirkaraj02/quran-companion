@@ -39,12 +39,12 @@ dependencies:
   audio_service: ^0.18.14
 
   # Prayer Times
-  adhan: ^2.0.0+1
-  geolocator: ^10.1.0
+  adhan: ^1.1.2
+  geolocator: ^14.0.0
   geocoding: ^3.0.0
 
   # Qibla
-  flutter_qiblah: ^2.2.1
+  flutter_qiblah: ^3.2.0
   sensors_plus: ^5.0.1
 
   # Notifications
@@ -71,7 +71,7 @@ dependencies:
   permission_handler: ^11.3.1
   url_launcher: ^6.3.0
   package_info_plus: ^8.0.2
-  flutter_compass: ^0.8.0
+  flutter_compass_v2: ^1.0.3
   device_info_plus: ^10.1.2
   http: ^1.2.2
   encrypt: ^5.0.3
@@ -89,7 +89,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  generate: true
 
   assets:
     - assets/images/
