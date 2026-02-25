@@ -43,6 +43,10 @@ jobs:
         working-directory: flutter_app
         run: flutter pub get
 
+      - name: Generate localizations
+        working-directory: flutter_app
+        run: flutter gen-l10n
+
       - name: Verify localizations file exists
         working-directory: flutter_app
         run: |
