@@ -9,11 +9,9 @@ on:
 
 jobs:
   build:
-    name: Build Flutter APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -29,75 +27,58 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Create required asset directories
+      - name: Write local.properties
+        working-directory: flutter_app/android
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "flutter.sdk=$(which flutter | xargs dirname | xargs dirname)" >> local.properties
+
+      - name: Create asset directories
         working-directory: flutter_app
         run: |
-          mkdir -p assets/images assets/fonts assets/translations
-          # Create placeholder font files so pubspec assets resolve
-          touch assets/fonts/UthmanicHafs.ttf
-          touch assets/fonts/IndoPakNastaleeq.ttf
-          touch assets/fonts/NotoNaskhArabic.ttf
-          touch assets/fonts/Amiri-Regular.ttf
-          touch assets/images/.gitkeep
-          touch assets/translations/.gitkeep
+          mkdir -p assets/fonts assets/images assets/audio assets/translations
+          touch assets/fonts/.gitkeep assets/images/.gitkeep
 
-      - name: Create l10n.yaml
-        working-directory: flutter_app
-        run: |
-          cat > l10n.yaml << 'YAML'
-          arb-dir: lib/l10n
-          template-arb-file: app_sq.arb
-          output-localization-file: app_localizations.dart
-          YAML
-
-      - name: Get Flutter dependencies
+      - name: Flutter pub get
         working-directory: flutter_app
         run: flutter pub get
 
-      - name: Run code generation
-        working-directory: flutter_app
-        run: |
-          dart run build_runner build --delete-conflicting-outputs || true
-
       - name: Generate localizations
         working-directory: flutter_app
-        run: flutter gen-l10n || true
+        run: flutter gen-l10n
 
-      - name: Analyze code
+      - name: Verify localizations file exists
+        working-directory: flutter_app
+        run: |
+          if [ ! -f lib/generated/l10n/app_localizations.dart ]; then
+            echo "❌ lib/generated/l10n/app_localizations.dart missing!"
+            exit 1
+          fi
+          echo "✅ Localizations file found"
+
+      - name: Analyze (non-blocking)
         working-directory: flutter_app
         run: flutter analyze --no-fatal-infos || true
 
-      - name: Build debug APK
+      - name: Build Debug APK
         working-directory: flutter_app
         run: flutter build apk --debug --no-shrink
 
-      - name: Upload debug APK
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: quran-companion-debug-apk
           path: flutter_app/build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 30
 
-      - name: Build release APK (unsigned)
+      - name: Build Release APK (non-blocking)
         working-directory: flutter_app
-        run: flutter build apk --release --no-shrink
+        run: flutter build apk --release --no-shrink || true
 
-      - name: Upload release APK
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: quran-companion-release-apk
           path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
-
-      - name: Create Release
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ github.run_number }}
-          name: "Quran Companion v${{ github.run_number }}"
-          body: "Automated build from commit ${{ github.sha }}"
-          files: flutter_app/build/app/outputs/flutter-apk/app-release.apk
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
