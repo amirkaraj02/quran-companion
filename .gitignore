@@ -34,5 +34,7 @@ backend/**/obj/
 .DS_Store
 Thumbs.db
 
-# Generated
+# Generated (but keep localization files)
 flutter_app/lib/generated/
+!flutter_app/lib/generated/l10n/
+!flutter_app/lib/generated/l10n/app_localizations.dart
