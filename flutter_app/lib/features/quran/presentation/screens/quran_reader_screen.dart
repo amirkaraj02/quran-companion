@@ -9,6 +9,7 @@ import '../widgets/reader_bottom_bar.dart';
 import '../widgets/jump_to_dialog.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../domain/entities/reading_position_entity.dart';
 
 class QuranReaderScreen extends ConsumerStatefulWidget {
   final int initialPage;

@@ -62,12 +62,15 @@ class _QiblaCompass extends StatelessWidget {
         final data = snapshot.data!;
         final qiblahAngle = data.qiblah;
         final deviceAngle = data.direction;
+        // Note: Accuracy not directly available from QiblahDirection
+        // Using a reasonable default compass accuracy value
+        const double compassAccuracy = 15.0;
 
         return Column(
           children: [
             const SizedBox(height: 32),
             // Accuracy indicator
-            _AccuracyBadge(accuracy: data.accuracy),
+            _AccuracyBadge(accuracy: compassAccuracy),
             const SizedBox(height: 32),
 
             // Compass
