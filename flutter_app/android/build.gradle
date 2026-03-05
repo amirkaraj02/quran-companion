@@ -13,30 +13,6 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
-// Patch flutter_qiblah plugin to add namespace for AGP 7.1+ compatibility
-gradle.projectsEvaluated {
-    def qiblahProject = rootProject.subprojects.find { it.name == 'flutter_qiblah' }
-    if (qiblahProject != null) {
-        qiblahProject.android {
-            namespace = 'com.jalalkhanji.flutter_qiblah'
-        }
-    }
-    
-    // Patch any other plugins that might need namespace configuration
-    rootProject.subprojects.each { project ->
-        try {
-            if (project.hasProperty('android') && !project.android.hasProperty('namespace')) {
-                def defaultNamespace = "com.example.${project.name.replace('-', '_').replace('_flutter_', '')}"
-                project.android {
-                    namespace = defaultNamespace
-                }
-            }
-        } catch (Exception e) {
-            // Plugin might not be an Android library, skip silently
-        }
-    }
-}
-
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }

@@ -71,7 +71,7 @@ dependencies:
   permission_handler: ^11.3.1
   url_launcher: ^6.3.0
   package_info_plus: ^8.0.2
-  flutter_compass_v2: ^1.0.3
+
   device_info_plus: ^10.1.2
   http: ^1.2.2
   encrypt: ^5.0.3
