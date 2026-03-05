@@ -1,0 +1,11 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index 1234567..abcdefg 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -1,6 +1,7 @@
+ group 'com.jalalkhanji.flutter_qiblah'
+ version '1.0-SNAPSHOT'
+ 
+ android {
++    namespace 'com.jalalkhanji.flutter_qiblah'
+     compileSdkVersion 34
